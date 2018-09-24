@@ -1,5 +1,5 @@
 /**
- * Created By @YashBhavsar001
+ * Created By @yashBhavsar007
  * 
  */
 
@@ -18,6 +18,7 @@ void token::create( account_name issuer,
     userstats.emplace(_self, [&](auto &p) {
             p.account = issuer;
             p.time_limit = 0;
+            
     });
     auto sym = maximum_supply.symbol;
     // checking for validation
@@ -72,31 +73,45 @@ void token::issue( account_name to, asset quantity, string memo )
 }
 
 // Function to validate user 
-void token::validate( account_name name)
+void token::validate( account_name name,account_name to)
 {
     usertable userstats(_self, _self);
     auto itr = userstats.find(name);
+    auto itr1 = userstats.find(to);
     // if user is admin then it just print hi admin
-    if(name == _self) 
+    if(name == _self ) 
     {
         print("hi admin!"); 
+        if(itr1 == userstats.end())
+        {
+            userstats.emplace(_self, [&](auto &p) {
+                p.account = to;
+                p.time_limit = now() + 86400;
+                
+            });
+        }
     }
     // if user is in not in our record then it adds user in recrd
-    else if(name != _self && itr == userstats.end())
+    else if(name != _self && itr == userstats.end() )
+    
     {
+       
         userstats.emplace(_self, [&](auto &p) {
             p.account = name;
             p.time_limit = now() + 86400;
+            
         });
-        print("in issue");
+        print("in validate");
     }
-    // if user alreasy exists in our record then it modifies it's time only
-    else{
-        userstats.modify(itr ,0, [&](auto &p) {
-            p.time_limit = now() + 86400;
-
-        });
-    }
+    else if(itr1 == userstats.end())
+        {
+            userstats.emplace(_self, [&](auto &p) {
+                p.account = to;
+                p.time_limit = 0;
+                
+            });
+        }
+    
 }
 
 // transfer function for users to transfer token between two accounts
@@ -105,12 +120,13 @@ void token::transfer( account_name from,
                       asset        quantity,
                       string       memo )
 {  
-    
-    validate(from); // calling validate function to validate from 
+    validate(from,to);
     usertable userstats(_self, _self); // using user stats table
     auto itr = userstats.find(from); 
     eosio_assert(itr != userstats.end(), "Account does not match with our records in transfer "); 
 
+   
+    
     // checking if current time is greater than user's time limit in our record 
     if(itr->time_limit < now())
     {
@@ -140,6 +156,7 @@ void token::transfer( account_name from,
     {
         eosio_assert(false,"Your Token is not unlocked yet! Wait untill it unlock!!!"); 
     }
+   
 
     
 }
