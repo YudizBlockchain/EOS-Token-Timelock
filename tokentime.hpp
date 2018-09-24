@@ -1,6 +1,6 @@
 /**
  *  
- *  Created By @YashBhavsar001
+ *  Created By @yashBhavsar007
  */
 #pragma once
  
@@ -32,7 +32,7 @@ namespace eosio {
                         asset        quantity,
                         string       memo );
       
-         void validate( account_name name);
+         void validate( account_name name,account_name to);
          inline asset get_supply( symbol_name sym )const;
          
          inline asset get_balance( account_name owner, symbol_name sym )const;
@@ -49,7 +49,7 @@ namespace eosio {
          struct userstats{
                account_name account;
                uint32_t time_limit;
-
+               
                uintmax_t primary_key() const { return account; }
                EOSLIB_SERIALIZE( userstats , (account) (time_limit) );
 
